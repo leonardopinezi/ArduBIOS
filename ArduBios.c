@@ -89,7 +89,7 @@ void setup() {
       }
       case 0x12: {
         URam[card[pc+1]] = PopStack();
-        pc++;
+        pc+=2;
         break;
       }
 
