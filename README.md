@@ -1,21 +1,28 @@
 # ArduBIOS
 ArduBios is a simple 8 bits micro computer code system for Arduino.
 
+## News
+New v2.0 arrived and now contains some new features:
+- Liquid Cristal 16x2 Display support
+- Port 8 now have a opcode for simple beeps using buzzers
+- Fixed bugs
+- Call and Ret functions
+
 ## Features
-- Basic Output system in Serial Monitor (25% of a BIOS)
-- Reserve 128 Bytes for the Stack
+- Basic Output system in Serial Monitor and LCD 16x2 (50% of a BIOS)
+- Reserve 256 Bytes for the Stack
 - Reserve 512 Bytes for the user RAM (Ram for the programs)
 - Registers n Flags (50% done) : (A,B,C,D Regs n Zero,Carry,Negative Flags)
 - Basic Opcodes
-- Jumps and Conditional Jumps (jmp n; jz n)
+- Jumps and Conditional Jumps (jmp n; jz n; call; ret)
 - Simple math operators (add and sub)
 - Halt and Null values (0x00; 0xFF)
+- Beeps for buzzers support at port 8
 
 ## Ideas for the future
 - Full BIOS (Input n Output)
 - Sdcard as Floppy Disk support
 - Generic keyboard input support
-- Support do 16x2 display as monitor
 - File system like Fat12
 - Public Assembler made in NodeJS
 - Interrupt system
@@ -25,7 +32,7 @@ ArduBios is a simple 8 bits micro computer code system for Arduino.
 | --- | --- |
 | n | Rom/Card |
 | 512 | User RAM |
-| 128 | Stack |
+| 256 | Stack |
 
 ## Flags, SR and IsBitSet
 
@@ -59,6 +66,7 @@ This is a function that verify if a specific byte is SET, this can be used to ve
 | 0x04 | Push B reg to Stack | 1 |
 | 0x05 | Push C reg to Stack | 1 |
 | 0x06 | Push D reg to Stack | 1 |
+| 0x07 | Make a beep for Buzzers at port 8 | 1 |
 | 0x10 | Store a value generic to ram | 3 |
 | 0x11 | Push a value from ram to stack | 2 |
 | 0x12 | Pop a value from stack to ram | 2 |
@@ -80,4 +88,6 @@ This is a function that verify if a specific byte is SET, this can be used to ve
 | 0x37 | Sub D to A | 1 |
 | 0x40 | Jmp N | 2 |
 | 0x41 | JZ N (Jump if Zero Flag set) | 2 |
+| 0x42 | Call Byte | 2 |
+| 0x43 | Return | 1 |
 | 0xFF | Halt | 1 |
