@@ -1,3 +1,7 @@
+#include <Adafruit_LiquidCrystal.h>
+
+Adafruit_LiquidCrystal lcd_1(0);
+
 // The program
 unsigned char card[] = {};
 
@@ -33,11 +37,12 @@ unsigned char IsBitSet(unsigned char bytevalue, int pos) {
 }
 
 void setup() {
+  lcd_1.begin(16, 2);
   unsigned char run = 1;
   Serial.begin(9600);
   delay(500);
 
-  Serial.println("--- ArduBios v1.0 ---");
+  Serial.println("--- ArduBios v2.0 ---");
 
   while(run) {
     switch(card[pc]) {
@@ -47,7 +52,9 @@ void setup() {
       }
       
       case 0x01: {
-        Serial.print((char)PopStack());
+        char c = (char)PopStack();
+        lcd_1.print(c);
+        Serial.print(c);
         pc++;
         break;
       }
@@ -73,6 +80,14 @@ void setup() {
       }
       case 0x06: {
         PushStack(D);
+        pc++;
+        break;
+      }
+      case 0x07: {
+        pinMode(13, OUTPUT);
+        tone(13, 1000);
+        delay(10);
+        noTone(13);
         pc++;
         break;
       }
@@ -192,6 +207,15 @@ void setup() {
         else pc+=2;
         break;
       }
+      case 0x42: {
+        PushStack(pc + 2);
+        pc = card[pc+1];
+        break;
+      }
+      case 0x43: {
+        pc = PopStack();
+        break;
+      }
       
       case 0xFF: {
         Serial.println("\nhalt");
@@ -204,6 +228,4 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
 }
