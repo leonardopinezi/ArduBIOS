@@ -4,7 +4,7 @@ ArduBios is a simple 8 bits micro computer code system for Arduino.
 ## News
 New v2.0 arrived and now contains some new features:
 - Liquid Cristal 16x2 Display support
-- Port 8 now have a opcode for simple beeps using buzzers
+- Port 13 now have a opcode for simple beeps using buzzers
 - Fixed bugs
 - Call and Ret functions
 
@@ -66,7 +66,7 @@ This is a function that verify if a specific byte is SET, this can be used to ve
 | 0x04 | Push B reg to Stack | 1 |
 | 0x05 | Push C reg to Stack | 1 |
 | 0x06 | Push D reg to Stack | 1 |
-| 0x07 | Make a beep for Buzzers at port 8 | 1 |
+| 0x07 | Make a beep for Buzzers at port 3 | 1 |
 | 0x10 | Store a value generic to ram | 3 |
 | 0x11 | Push a value from ram to stack | 2 |
 | 0x12 | Pop a value from stack to ram | 2 |
