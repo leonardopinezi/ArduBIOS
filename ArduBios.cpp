@@ -1,22 +1,32 @@
-#include <Adafruit_LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
 
-Adafruit_LiquidCrystal lcd_1(0);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// The program
 unsigned char card[] = {};
 
 // Stack n User Ram
 unsigned char Stack[128] = {0};
+unsigned char CStack[128] = {0};
 unsigned char URam[512] = {0};
 int sp = 0;
+int cp = 0;
 int pc = 0;
 
 void PushStack(unsigned char number) {
   if(sp < 128) Stack[sp++] = number;
 }
 
+void PushCall(unsigned char number) {
+  if(cp < 128) CStack[cp++] = number;
+}
+
 unsigned char PopStack() {
   if(sp > 0) return Stack[--sp];
+  return 0;
+}
+
+unsigned char PopCall() {
+  if(cp > 0) return CStack[--cp];
   return 0;
 }
 
@@ -25,8 +35,12 @@ unsigned char A=0, B=0, C=0, D=0;
 unsigned char SR=0;
 
 void EvaluateA(unsigned char b, unsigned char o=0) {
-  if(A == 0) SR |= 0x01; else SR &= ~0x01;
+  unsigned char result = A - b;
+
+  if(result == 0) SR |= 0x01; else SR &= ~0x01;
+
   if(A + b > 255) SR |= 0x02; else SR &= ~0x02;
+
   if(o==1 && A < b) SR |= 0x04; else SR &= ~0x04;
 }
 
@@ -37,12 +51,14 @@ unsigned char IsBitSet(unsigned char bytevalue, int pos) {
 }
 
 void setup() {
-  lcd_1.begin(16, 2);
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
   unsigned char run = 1;
   Serial.begin(9600);
   delay(500);
 
-  Serial.println("--- ArduBios v2.0 ---");
+  Serial.println("--- ArduBios v3.0 ---");
 
   while(run) {
     switch(card[pc]) {
@@ -53,7 +69,7 @@ void setup() {
       
       case 0x01: {
         char c = (char)PopStack();
-        lcd_1.print(c);
+        lcd.print(c);
         Serial.print(c);
         pc++;
         break;
@@ -86,8 +102,13 @@ void setup() {
       case 0x07: {
         pinMode(13, OUTPUT);
         tone(13, 1000);
-        delay(10);
+        delay(100);
         noTone(13);
+        pc++;
+        break;
+      }
+      case 0x08: {
+        lcd.clear();
         pc++;
         break;
       }
@@ -208,21 +229,53 @@ void setup() {
         break;
       }
       case 0x42: {
-        PushStack(pc + 2);
+        PushCall(pc + 2);
         pc = card[pc+1];
         break;
       }
       case 0x43: {
-        pc = PopStack();
+        pc = PopCall();
         break;
       }
-      
+
+      case 0x50: {
+        EvaluateA(card[pc+1], 1);
+        pc+=2;
+        break;
+      }
+      case 0x51: {
+        EvaluateA(B, 1);
+        pc++;
+        break;
+      }
+      case 0x52: {
+        EvaluateA(C, 1);
+        pc++;
+        break;
+      }
+      case 0x53: {
+        EvaluateA(D, 1);
+        pc++;
+        break;
+      }
+
+      case 0x60: {
+          delay(card[pc+1]);
+          pc += 2;
+          break;
+      }
+
       case 0xFF: {
         Serial.println("\nhalt");
         run = 0;
         break;
       }
-      default: { break; }
+      default: { 
+        Serial.print("Erro: Opcode desconhecido: "); 
+        Serial.println(card[pc]);
+        pc++; 
+        break; 
+      }
     }
   }
 }
